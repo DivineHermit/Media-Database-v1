@@ -36,6 +36,7 @@ class MDB(QtWidgets.QMainWindow):
         super(MDB, self).__init__()
         # ----- Connect to the database handler -----
         self.database = MDBHandler(database)
+        self.database.create_tables()
         # ----- Create UI -----
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
