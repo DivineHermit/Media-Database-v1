@@ -32,7 +32,10 @@ __author__ = "Dominic Lee"
 class MDB(QtWidgets.QMainWindow):
     """"""
     def __init__(self, database="Media-Database.db"):
-        """"""
+        """
+        Initialize the UI.
+        :param database: Name of the database (defaults to 'Media-Database.db')
+        """
         super(MDB, self).__init__()
         # ----- Connect to the database handler -----
         self.database = MDBHandler(database)
@@ -136,7 +139,9 @@ class MDB(QtWidgets.QMainWindow):
 
     # ---------- UI Methods ----------
     def about(self):
-        """"""
+        """
+        Triggers a message box with basic app info.
+        """
         QtWidgets.QMessageBox.information(
             self,
             f"About Media Database v{__version__}",
@@ -316,15 +321,19 @@ class MDB(QtWidgets.QMainWindow):
         logger.debug(f"MDB.search_option set to: {self.search_option}")
 
     def show_edit_genres(self):
-        """"""
+        """Makes the Edit Genres window visible."""
         self.edit_genres.show()
 
     def show_edit_media_types(self):
-        """"""
+        """Makes the Edit Media Types window visible."""
         self.edit_media_types.show()
 
     def show_entries_converter(self, sender):
-        """"""
+        """
+        Makes the Entries Converter window visible.
+        The Entries Converter allows you to change all entries
+        from one genre/media type to another.
+        """
         self.entries_converter.clear_ui()
         if sender == self.ui.actionConvert_Genres:
             for old in self.database.return_distinct_entries(table="media", column="genre"):
@@ -351,6 +360,7 @@ class MDB(QtWidgets.QMainWindow):
 class MDBEditGenres(QtWidgets.QMainWindow):
     """"""
     def __init__(self, database="Media-Database.db", parent=None):
+        """Initialize the Edit Genres sub-window."""
         super(MDBEditGenres, self).__init__(parent)
         # ----- Connect to Database -----
         self.database = MDBHandler(database)
@@ -367,7 +377,7 @@ class MDBEditGenres(QtWidgets.QMainWindow):
 
     # ----- UI Methods -----
     def clear_ui(self):
-        """"""
+        """Clear all the widgets and reload the genres list."""
         self.ui.lst_genres.clear()
         self.ui.le_genre_name.clear()
         self.ui.le_genre_name.setFocus()
@@ -380,11 +390,11 @@ class MDBEditGenres(QtWidgets.QMainWindow):
         self.ui.le_genre_name.setFocus()
 
     def closeEvent(self, event=None):
-        """"""
+        """Override the close event and just hide the window."""
         self.hide()
 
     def create_connections(self):
-        """"""
+        """Links PyQt signals with their corresponding method."""
         # self.ui.central_widget.keyPressEvent.connect()
         self.ui.lst_genres.currentItemChanged.connect(self.display_genre_info)
         self.ui.btn_add_genre.clicked.connect(self.add_genre)
@@ -394,7 +404,7 @@ class MDBEditGenres(QtWidgets.QMainWindow):
         self.ui.btn_clear.clicked.connect(self.clear_ui)
 
     def display_genre_info(self):
-        """"""
+        """Load the gui with info on the selected item from the genre list."""
         if self.ui.lst_genres.currentItem() is not None:
             logger.debug(f"MDB.display_genre_info Current genre was: {self.current_genre}")
             self.current_genre = self.database.select_one_entry(
@@ -408,7 +418,7 @@ class MDBEditGenres(QtWidgets.QMainWindow):
             self.ui.te_genre_examples.setPlainText(self.current_genre[3])
 
     def load_genres(self):
-        """"""
+        """Populate the listbox with all the genres in the database."""
         try:
             # Clear the list box to avoid duplicate listings
             self.ui.lst_genres.clear()
@@ -421,7 +431,7 @@ class MDBEditGenres(QtWidgets.QMainWindow):
 
     # ----- Database Methods -----
     def add_genre(self):
-        """"""
+        """Add a genre to the database with data from the UI."""
         try:
             self.database.add_genre(
                 genre=self.ui.le_genre_name.text(),
@@ -433,7 +443,10 @@ class MDBEditGenres(QtWidgets.QMainWindow):
             logger.exception("Error in MDBEditGenres.add_genres")
 
     def delete_genre(self):
-        """"""
+        """
+        Delete a genre from the database, the database handler
+        will remove the genre from all entries too.
+        """
         try:
             self.database.delete_genre(entry=self.current_genre)
             self.clear_ui()
@@ -441,12 +454,12 @@ class MDBEditGenres(QtWidgets.QMainWindow):
             logger.exception("Error in MDBEditGenres.delete_genres")
 
     def update_genre(self):
-        """"""
+        """Update selected genres information with info from the UI."""
         try:
             if self.current_genre is None or self.ui.le_genre_name.text() == "":
                 QtWidgets.QMessageBox.warning(
                     self,
-                    "Nothing selected",
+                    "Update Error!",
                     "Unable to update.\nEither nothing is selected or the name box is empty.",
                     QtWidgets.QMessageBox.Ok)
             else:
@@ -465,6 +478,7 @@ class MDBEditGenres(QtWidgets.QMainWindow):
 class MDBEditMediaTypes(QtWidgets.QMainWindow):
     """"""
     def __init__(self, database="Media-Database.db", parent=None):
+        """Initialize the Edit Media Types sub-window."""
         super(MDBEditMediaTypes, self).__init__(parent)
         # ----- Connect to Database -----
         self.database = MDBHandler(database)
@@ -481,7 +495,7 @@ class MDBEditMediaTypes(QtWidgets.QMainWindow):
 
     # ----- UI Methods -----
     def clear_ui(self):
-        """"""
+        """Clear all the widgets and reload the media types list."""
         self.ui.lst_media_types.clear()
         self.ui.le_type_name.clear()
         self.ui.le_type_name.setFocus()
@@ -489,11 +503,11 @@ class MDBEditMediaTypes(QtWidgets.QMainWindow):
         self.current_media_type = None
 
     def closeEvent(self, event=None):
-        """"""
+        """Override the close event and just hide the window."""
         self.hide()
 
     def create_connections(self):
-        """"""
+        """Links PyQt signals with their corresponding method."""
         self.ui.lst_media_types.currentItemChanged.connect(self.display_type_info)
         self.ui.btn_add_type.clicked.connect(self.add_media_type)
         self.ui.btn_delete_type.clicked.connect(self.delete_media_type)
@@ -501,20 +515,11 @@ class MDBEditMediaTypes(QtWidgets.QMainWindow):
         self.ui.btn_clear.clicked.connect(self.clear_ui)
         self.ui.btn_done.clicked.connect(self.closeEvent)
 
-    def load_media_types(self):
-        """"""
-        try:
-            # Clear the list box to avoid duplicate listings
-            self.ui.lst_media_types.clear()
-            # Now populate the list box with all the genres in the database
-            for genre in self.database.return_all_entries(
-                    table="media_types", column="type"):
-                self.ui.lst_media_types.addItem(genre[0])
-        except Exception:
-            logger.exception("Error in MDBEditGenres.load_media_types")
-
     def display_type_info(self):
-        """"""
+        """
+        Load the gui with info on the selected item from
+        the media types list.
+        """
         if self.ui.lst_media_types.currentItem() is not None:
             logger.debug(f"MDBEditMediaTypes.display_type_info "
                          f"Current type was: {self.current_media_type}")
@@ -526,9 +531,24 @@ class MDBEditMediaTypes(QtWidgets.QMainWindow):
                          f"Current type set to: {self.current_media_type}")
             self.ui.le_type_name.setText(self.current_media_type[1])
 
+    def load_media_types(self):
+        """
+        Populate the listbox with all the media types
+        in the database.
+        """
+        try:
+            # Clear the list box to avoid duplicate listings
+            self.ui.lst_media_types.clear()
+            # Now populate the list box with all the genres in the database
+            for genre in self.database.return_all_entries(
+                    table="media_types", column="type"):
+                self.ui.lst_media_types.addItem(genre[0])
+        except Exception:
+            logger.exception("Error in MDBEditGenres.load_media_types")
+
     # ----- Database Methods -----
     def add_media_type(self):
-        """"""
+        """Add a media type to the database with data from the UI."""
         try:
             self.database.add_media_type(media_type=self.ui.le_type_name.text())
             self.clear_ui()
@@ -537,7 +557,11 @@ class MDBEditMediaTypes(QtWidgets.QMainWindow):
             logger.exception("Error in MDBEditMediaTypes.add_media_type")
 
     def delete_media_type(self):
-        """"""
+        """
+        Delete a media type from the database,
+        the database handler will remove the media type
+        from all entries too.
+        """
         try:
             if self.current_media_type is None:
                 QtWidgets.QMessageBox.warning(
@@ -553,7 +577,7 @@ class MDBEditMediaTypes(QtWidgets.QMainWindow):
             logger.exception("Error in MDBEditMediaTypes.delete_media_type")
 
     def update_media_type(self):
-        """"""
+        """Update selected media type information with info from the UI."""
         try:
             if self.current_media_type is None or self.ui.le_type_name.text() == "":
                 QtWidgets.QMessageBox.warning(
@@ -575,6 +599,7 @@ class MDBEditMediaTypes(QtWidgets.QMainWindow):
 class MDBEntriesConverter(QtWidgets.QMainWindow):
     """"""
     def __init__(self, database="Media-Database.db", parent=None):
+        """Initialize the Entries Converter sub-window."""
         super(MDBEntriesConverter, self).__init__(parent)
         self.ui = Ui_Converter()
         self.ui.setupUi(self)
@@ -583,17 +608,24 @@ class MDBEntriesConverter(QtWidgets.QMainWindow):
         self.column = None
 
     def clear_ui(self):
-        """"""
+        """Clear all the widgets."""
         self.ui.cb_old_values.clear()
         self.ui.cb_new_values.clear()
 
     def closeEvent(self, event=None):
-        """"""
+        """
+        Override the close event to clear the widgets
+        and hide the window.
+        """
         self.clear_ui()
         self.hide()
 
     def convert_entries(self):
-        """"""
+        """
+        Display a message box to confirm the change and then
+        pass the values from the combo boxes to the database handler
+        to convert the selected entries.
+        """
         try:
             choice = QtWidgets.QMessageBox.information(
                 self,
@@ -614,12 +646,13 @@ class MDBEntriesConverter(QtWidgets.QMainWindow):
             logger.exception("Error in MDBEntriesConverter.convert_entries")
 
     def create_connections(self):
-        """"""
+        """Links PyQt signals with their corresponding method."""
         self.ui.btn_ok.clicked.connect(self.convert_entries)
         self.ui.btn_cancel.clicked.connect(self.closeEvent)
 
 
 def main():
+    """Setup and display the application when run."""
     app = QtWidgets.QApplication(sys.argv)
     window = MDB()
     window.show()
@@ -627,6 +660,7 @@ def main():
 
 
 def exception_hook(cls, exception, traceback):
+    """Used to display traceback for errors with Qt."""
     sys.__excepthook__(cls, exception, traceback)
 
 
