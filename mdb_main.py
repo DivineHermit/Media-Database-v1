@@ -570,7 +570,7 @@ class MDBEditMediaTypes(QtWidgets.QMainWindow):
                     "Unable to deleted as nothing is selected.",
                     QtWidgets.QMessageBox.Ok)
             else:
-                self.database.delete_media_type(entry=self.current_media_type)
+                self.database.delete_media_type(media_type=self.current_media_type)
                 self.clear_ui()
                 self.load_media_types()
         except Exception:

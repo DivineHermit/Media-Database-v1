@@ -120,7 +120,12 @@ class MDBHandler:
 
     # ----- Genres Table -----
     def add_genre(self, genre, description="", examples=""):
-        """"""
+        """
+        Add a genre to the database.
+        :param genre: Name of the genre that appears in combo boxes.
+        :param description: A description of the genre.
+        :param examples: Example media of the genre.
+        """
         logger.debug(f"MDBHandler.add_genre\nTrying to insert:\n"
                      f"genre={genre}\ndescription={description}\nexamples={examples}")
         try:
@@ -149,7 +154,14 @@ class MDBHandler:
             logger.exception("Error in MDBHandler.delete_genre")
 
     def update_genre(self, rowid, genre, description, examples):
-        """"""
+        """
+        Update the genre with 'rowid' in the database.
+
+        :param rowid: Int id of entry
+        :param genre: Name of the genre (e.g. Action)
+        :param description: A description of the genre.
+        :param examples: An example of the genre (e.g. Die Hard)
+        """
         logger.debug(f"MDBHandler.update_genre\nUpdating:\nrowid={rowid}\n"
                      f"genre={genre}\ndescription={description}\n"
                      f"examples={examples}")
@@ -171,7 +183,11 @@ class MDBHandler:
 
     # ----- Media Types Table -----
     def add_media_type(self, media_type):
-        """"""
+        """
+        Add a media type to the database.
+        :param media_type: Name of the media type (e.g. DVD)
+        :return: None
+        """
         logger.debug(f"MDBHandler.add_media_type\nmedia_type={media_type}")
         try:
             with self.connection:
@@ -182,24 +198,33 @@ class MDBHandler:
         except Exception:
             logger.exception("Error in MDBHandler.add_media_type")
 
-    def delete_media_type(self, entry):
-        """"""
+    def delete_media_type(self, media_type):
+        """
+        Delete 'media_type' from the database and all entries.
+        :param media_type: Name of media type to delete
+        :return: None
+        """
         try:
             with self.connection:
                 self.convert_entries(column="media_type",
-                                     old_value=entry[1],
+                                     old_value=media_type[1],
                                      new_value="-DELETED MEDIA TYPE-")
                 logger.debug(f"MDBHandler.delete_media_type\n"
-                             f"Swapped '{entry[1]}' to '-DELETED MEDIA TYPE-'")
+                             f"Swapped '{media_type[1]}' to '-DELETED MEDIA TYPE-'")
                 self.cursor.execute("DELETE FROM media_types WHERE rowid=:rowid",
-                                    {"rowid": entry[0]})
-                logger.debug(f"MDBHandler.delete_media_type\nDELETED TYPE: {entry[0]}")
+                                    {"rowid": media_type[0]})
+                logger.debug(f"MDBHandler.delete_media_type\nDELETED TYPE: {media_type[0]}")
                 self.connection.commit()
         except Exception:
             logger.exception("Error in MDBHandler.delete_media_types")
 
     def update_media_type(self, rowid, media_type):
-        """"""
+        """
+        Update the media type with 'rowid'.
+        :param rowid: Int id of the media type to change.
+        :param media_type: New name to change to.
+        :return: None
+        """
         try:
             with self.connection:
                 self.cursor.execute(
@@ -239,7 +264,14 @@ class MDBHandler:
             logging.exception("Error in MDBHandler.return_all_entries")
 
     def return_distinct_entries(self, table, column, count=1000):
-        """"""
+        """
+        Generator that yields only distinct entries.
+
+        :param table:  Name of the table to search.
+        :param column: Name of the column to search.
+        :param count:  Memory buffer (defaults to 1000).
+        :return:       Yields one row at a time.
+        """
         try:
             with self.connection:
                 self.cursor.execute(f"""SELECT DISTINCT {column} FROM {table} ORDER BY {column}""")
@@ -323,11 +355,11 @@ class MDBHandler:
 
     def select_one_entry(self, table="media", column="title", value=""):
         """
-
-        :param table:
-        :param column:
-        :param value:
-        :return:
+        Select a single entry from the database.
+        :param table:  Name of the table to search.
+        :param column: Name of the column.
+        :param value:  Value to find.
+        :return: tuple/one row from the database.
         """
         try:
             with self.connection:
